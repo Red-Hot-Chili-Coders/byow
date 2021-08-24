@@ -16,10 +16,9 @@ public class WorldTree {
     * */
 
     Container root;
-    // null node cache
     List<Container> leafNodes;
-    static final int WIDTH = 80;
-    static final int HEIGHT = 40;
+    static final int WIDTH = 50;
+    static final int HEIGHT = 50;
     static Random RANDOM;
 
     WorldTree(Container r){
@@ -28,9 +27,41 @@ public class WorldTree {
         leafNodes.add(root);
     }
 
-    // direction :  1 for vertical , 2 for horizontal
+    // returns the proper spliting size , if the box cant be split
+    // according to the ratio , returns -1
+
+    int splitSize(int orignalSize, int orignalConstant, boolean isVertical) {
+
+        float ratio1;
+        float ratio2;
+
+        int iterations = 0;
+        while (iterations <= 10){
+            int leftSize = RANDOM.nextInt(orignalSize);
+            int rightSize = orignalSize - leftSize;
+
+            if (isVertical){
+                ratio1 = (float) leftSize/orignalConstant;
+                ratio2 = (float) rightSize/orignalConstant;
+            }else{
+                ratio1 = (float) orignalConstant/leftSize;
+                ratio2 = (float) orignalConstant/rightSize;
+            }
+
+            if (ratio1 > 0.45 && ratio2 > 0.45){
+                return leftSize;
+            }
+            iterations++;
+        }
+
+        return -1;
+    }
+
+
+    // direction :  even for vertical , odd for horizontal
     // iter : split iterations
     // cache null nodes and create splits directly
+
     void makeSplit(int iter){
         long direction = RANDOM.nextInt();
 
@@ -41,21 +72,39 @@ public class WorldTree {
 
         ArrayList<Container> newLeafNodes = new ArrayList<>();
         for (Container c : leafNodes){
-            System.out.println(c.w);
             if (c.w == 0 || c.h == 0){
                 continue;
             }
 
             if (direction % 2 == 0){
-                Container left = new Container(c.x, c.y, RANDOM.nextInt(c.w), c.h);
-                Container right = new Container(c.x + left.w, c.y, c.w - left.w , c.h);
+
+                int leftWidth = splitSize(c.w, c.h, true);
+                if (leftWidth < 0){
+                    continue;
+                }
+                int rightWidth = c.w - leftWidth;
+                int leftHeight = c.h;
+                int righttHeight= c.h;
+
+                Container left = new Container(c.x, c.y, leftWidth, leftHeight);
+                Container right = new Container(c.x + left.w, c.y, rightWidth , righttHeight);
                 c.lChild = left;
                 c.rChild = right;
                 newLeafNodes.add(left);
                 newLeafNodes.add(right);
+
+
             }else {
-                Container left = new Container(c.x, c.y, c.w , RANDOM.nextInt(c.h));
-                Container right = new Container(c.x , c.y + left.h  , c.w, c.h - left.h );
+                int leftWidth = c.w;
+                int rightWidth = c.w;
+                int leftHeight = splitSize(c.h, c.w, false);
+                if (leftHeight < 0){
+                    continue;
+                }
+                int rightHeight = c.h - leftHeight;
+
+                Container left = new Container(c.x, c.y, leftWidth, leftHeight);
+                Container right = new Container(c.x , c.y + left.h, rightWidth, rightHeight);
                 c.lChild = left;
                 c.rChild = right;
                 newLeafNodes.add(left);
@@ -64,7 +113,6 @@ public class WorldTree {
         }
         leafNodes = newLeafNodes;
         makeSplit(iter - 1);
-        System.out.println(leafNodes);
     }
 
     // Draw the leaf nodes (rooms)
@@ -106,12 +154,6 @@ public class WorldTree {
         }
     }
 
-    void drawDividers(Container tmp, TETile[][] world){
-        System.out.println(tmp.x + " " + tmp.y);
-
-    }
-
-
     void setRandom(long seed){
         RANDOM = new Random(seed);
     }
@@ -124,7 +166,7 @@ public class WorldTree {
         WorldTree tree = new WorldTree(root);
         tree.setRandom(69420);
         // splitting and forming the tree
-        tree.makeSplit(8);
+        tree.makeSplit(6);
 
         // making the world array
         TETile[][] world = new TETile[WIDTH][HEIGHT];
