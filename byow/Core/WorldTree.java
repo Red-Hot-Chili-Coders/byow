@@ -18,103 +18,91 @@ public class WorldTree {
 
     Container root;
     // null node cache
-    List<Container> cache;
+    List<Container> leafNodes;
     static final int WIDTH = 80;
     static final int HEIGHT = 40;
 
-    WorldTree(Container root){
-        this.root = root;
-        this.cache = new ArrayList<>();
-        cache.add(root);
+    WorldTree(Container r){
+        root = r;
+        leafNodes = new ArrayList<>();
+        leafNodes.add(root);
     }
 
     // direction :  1 for vertical , 2 for horizontal
     // iter : split iterations
     // cache null nodes and create splits directly
     void makeSplit(int iter){
-       Random r = new Random((long) (Math.sqrt(iter)*1000));
+        Random r = new Random((long) (Math.sqrt(iter)*1000));
         int direction = r.nextInt(5);
+
         // default split : vertical
         if (iter == 0){
             return;
         }
-        ArrayList<Container> newcache = new ArrayList<>();
-        for (Container c : cache){
+
+        ArrayList<Container> newLeafNodes = new ArrayList<>();
+        for (Container c : leafNodes){
             System.out.println(c.w);
             if (c.w == 0 || c.h == 0){
                 continue;
             }
+
             if (direction == 1){
                 Container left = new Container(c.x, c.y, r.nextInt(c.w), c.h);
                 Container right = new Container(c.x + left.w, c.y, c.w - left.w , c.h);
                 c.lChild = left;
                 c.rChild = right;
-                newcache.add(left);
-                newcache.add(right);
+                newLeafNodes.add(left);
+                newLeafNodes.add(right);
             }else {
                 Container left = new Container(c.x, c.y, c.w , r.nextInt(c.h));
                 Container right = new Container(c.x , c.y + left.h  , c.w, c.h - left.h );
                 c.lChild = left;
                 c.rChild = right;
-                newcache.add(left);
-                newcache.add(right);
+                newLeafNodes.add(left);
+                newLeafNodes.add(right);
             }
         }
-        cache = newcache;
+        leafNodes = newLeafNodes;
         makeSplit(iter - 1);
-        System.out.println(cache);
+        System.out.println(leafNodes);
     }
 
-    // lets make and render rooms
-    void renderWorld(){
-        // do a preorder traversal of rooms
-        // add door at center points
-
-        // rendering parts
-        int iter = 2;
-        TERenderer te = new TERenderer();
-        te.initialize(WIDTH, HEIGHT);
-
-        TETile[][] world = new TETile[WIDTH][HEIGHT];
-
-        Stack<Container> roomStack = new Stack<>();
-        roomStack.push(root);
+    // Draw the leaf nodes (rooms)
+    void generateWorld(TETile[][] world){
         for (int i = 0; i < WIDTH; i++){
             for (int j = 0; j < HEIGHT; j++){
                 world[i][j] = Tileset.NOTHING;
             }
         }
-        while (!roomStack.isEmpty()){
-            Container tmp = roomStack.pop();
-            System.out.println(tmp.x + " " + tmp.y + " " + tmp.h + " " + tmp.w);
-            drawBox(tmp, world);
-            if (tmp.rChild != null){
-                roomStack.push(tmp.rChild);
-            }
-            if (tmp.lChild != null){
-                roomStack.push(tmp.lChild);
-            }
-        }
 
-        te.renderFrame(world);
+        for (Container container: leafNodes) {
+            drawBox(container, world);
+        }
     }
 
-    void drawBox(Container tmp, TETile[][] world){
+    void drawBox(Container container, TETile[][] world){
         TETile t = Tileset.WALL;
-        if (tmp.h == 0 || tmp.w == 0){
+
+        // if container is empty
+        if (container.h == 0 || container.w == 0){
             return;
         }
-        for (int i = tmp.x; i < tmp.x + tmp.w; i++){
-            world[i][tmp.y] = t;
+
+        // drawing both horizontal lines of the box
+        for (int i = container.x; i < container.x + container.w; i++){
+            world[i][container.y] = t;
+
+            int upperHorizontalLineY = container.y + container.h - 1;
+            world[i][upperHorizontalLineY] = t;
         }
-        for (int i = tmp.y; i < tmp.y + tmp.h; i++){
-            world[tmp.x][i] = t;
-        }
-        for (int i = tmp.x; i < tmp.x + tmp.w; i++){
-            world[i][tmp.y + tmp.h - 1] = t;
-        }
-        for (int i = tmp.y; i < tmp.y + tmp.h; i++){
-            world[tmp.x + tmp.w - 1][i] = t;
+
+        // drawing both vertical lines of the box
+        for (int i = container.y; i < container.y + container.h; i++){
+            world[container.x][i] = t;
+
+            int rightVerticalLineX = container.x + container.w - 1;
+            world[rightVerticalLineX][i] = t;
         }
     }
 
@@ -124,11 +112,20 @@ public class WorldTree {
     }
 
     public static void main(String[] args) {
+        TERenderer te = new TERenderer();
+        te.initialize(WIDTH, HEIGHT);
+
         Container root = new Container(0,0,WIDTH,HEIGHT);
         WorldTree tree = new WorldTree(root);
+
+        // splitting and forming the tree
         tree.makeSplit(3);
-        tree.renderWorld();
+
+        // making the world array
+        TETile[][] world = new TETile[WIDTH][HEIGHT];
+        tree.generateWorld(world);
+
+        // rendering the world array
+        te.renderFrame(world);
     }
-
-
 }
