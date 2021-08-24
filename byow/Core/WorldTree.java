@@ -84,7 +84,6 @@ public class WorldTree {
                 world[i][j] = Tileset.NOTHING;
             }
         }
-        drawBox(root, world);
         while (!roomStack.isEmpty()){
             Container tmp = roomStack.pop();
             System.out.println(tmp.x + " " + tmp.y + " " + tmp.h + " " + tmp.w);
@@ -102,6 +101,9 @@ public class WorldTree {
 
     void drawBox(Container tmp, TETile[][] world){
         TETile t = Tileset.WALL;
+        if (tmp.h == 0 || tmp.w == 0){
+            return;
+        }
         for (int i = tmp.x; i < tmp.x + tmp.w; i++){
             world[i][tmp.y] = t;
         }
@@ -121,12 +123,10 @@ public class WorldTree {
 
     }
 
-
-
     public static void main(String[] args) {
         Container root = new Container(0,0,WIDTH,HEIGHT);
         WorldTree tree = new WorldTree(root);
-        tree.makeSplit(1);
+        tree.makeSplit(3);
         tree.renderWorld();
     }
 
