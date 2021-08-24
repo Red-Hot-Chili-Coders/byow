@@ -1,0 +1,22 @@
+<component name="libraryTable">
+  <library name="byow">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/ucb/cs61b/library-sp21/javalib/xchart-3.5.1.jar!/" />
+      <root url="jar://$USER_HOME$/ucb/cs61b/library-sp21/javalib/ucb.jar!/" />
+      <root url="jar://$USER_HOME$/ucb/cs61b/library-sp21/javalib/stdlib.jar!/" />
+      <root url="jar://$USER_HOME$/ucb/cs61b/library-sp21/javalib/stdlib-package.jar!/" />
+      <root url="jar://$USER_HOME$/ucb/cs61b/library-sp21/javalib/junit-4.12.jar!/" />
+      <root url="jar://$USER_HOME$/ucb/cs61b/library-sp21/javalib/jh61b.jar!/" />
+      <root url="jar://$USER_HOME$/ucb/cs61b/library-sp21/javalib/hamcrest-core-1.3.jar!/" />
+      <root url="jar://$USER_HOME$/ucb/cs61b/library-sp21/javalib/algs4.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$" />
+      <root url="jar://$USER_HOME$/ucb/cs61b/library-sp21/javalib/stdlib.jar!/" />
+      <root url="jar://$USER_HOME$/ucb/cs61b/library-sp21/javalib/stdlib-package.jar!/" />
+      <root url="jar://$USER_HOME$/ucb/cs61b/library-sp21/javalib/jh61b.jar!/" />
+      <root url="jar://$USER_HOME$/ucb/cs61b/library-sp21/javalib/algs4.jar!/" />
+    </SOURCES>
+  </library>
+</component>
