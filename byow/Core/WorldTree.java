@@ -8,7 +8,6 @@ import byow.TileEngine.Tileset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Stack;
 
 public class WorldTree {
     /* Using a BSP to represent the world ,
@@ -21,6 +20,7 @@ public class WorldTree {
     List<Container> leafNodes;
     static final int WIDTH = 80;
     static final int HEIGHT = 40;
+    static Random RANDOM;
 
     WorldTree(Container r){
         root = r;
@@ -32,8 +32,7 @@ public class WorldTree {
     // iter : split iterations
     // cache null nodes and create splits directly
     void makeSplit(int iter){
-        Random r = new Random((long) (Math.sqrt(iter)*1000));
-        int direction = r.nextInt(5);
+        long direction = RANDOM.nextInt();
 
         // default split : vertical
         if (iter == 0){
@@ -47,15 +46,15 @@ public class WorldTree {
                 continue;
             }
 
-            if (direction == 1){
-                Container left = new Container(c.x, c.y, r.nextInt(c.w), c.h);
+            if (direction % 2 == 0){
+                Container left = new Container(c.x, c.y, RANDOM.nextInt(c.w), c.h);
                 Container right = new Container(c.x + left.w, c.y, c.w - left.w , c.h);
                 c.lChild = left;
                 c.rChild = right;
                 newLeafNodes.add(left);
                 newLeafNodes.add(right);
             }else {
-                Container left = new Container(c.x, c.y, c.w , r.nextInt(c.h));
+                Container left = new Container(c.x, c.y, c.w , RANDOM.nextInt(c.h));
                 Container right = new Container(c.x , c.y + left.h  , c.w, c.h - left.h );
                 c.lChild = left;
                 c.rChild = right;
@@ -70,6 +69,7 @@ public class WorldTree {
 
     // Draw the leaf nodes (rooms)
     void generateWorld(TETile[][] world){
+
         for (int i = 0; i < WIDTH; i++){
             for (int j = 0; j < HEIGHT; j++){
                 world[i][j] = Tileset.NOTHING;
@@ -111,15 +111,20 @@ public class WorldTree {
 
     }
 
+
+    void setRandom(long seed){
+        RANDOM = new Random(seed);
+    }
+
     public static void main(String[] args) {
         TERenderer te = new TERenderer();
         te.initialize(WIDTH, HEIGHT);
 
         Container root = new Container(0,0,WIDTH,HEIGHT);
         WorldTree tree = new WorldTree(root);
-
+        tree.setRandom(69420);
         // splitting and forming the tree
-        tree.makeSplit(3);
+        tree.makeSplit(8);
 
         // making the world array
         TETile[][] world = new TETile[WIDTH][HEIGHT];
