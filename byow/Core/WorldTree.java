@@ -46,7 +46,7 @@ public class WorldTree {
             }
             if (direction == 1){
                 Container left = new Container(c.x, c.y, r.nextInt(c.w), c.h);
-                Container right = new Container(c.x + left.w  , c.y, c.w - left.w , c.h);
+                Container right = new Container(c.x + left.w, c.y, c.w - left.w , c.h);
                 c.lChild = left;
                 c.rChild = right;
                 newcache.add(left);
