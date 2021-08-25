@@ -17,11 +17,11 @@ public class WorldTree {
 
     Container root;
     List<Container> leafNodes;
-    static final int WIDTH = 100;
-    static final int HEIGHT = 50;
+    static final int WIDTH = 80;
+    static final int HEIGHT = 40;
     static Random RANDOM;
     static final boolean displayPartitions = false;
-    static TETile pathTile = Tileset.FLOOR;
+    static TETile pathTile = Tileset.FLOWER;
     static TETile wallTile = Tileset.WALL;
 
     WorldTree(Container r){
@@ -121,17 +121,20 @@ public class WorldTree {
     // Draw the leaf nodes (rooms)
     private void generateWorld(TETile[][] world){
 
+
+
         for (int i = 0; i < WIDTH; i++){
             for (int j = 0; j < HEIGHT; j++){
                 world[i][j] = Tileset.NOTHING;
             }
         }
 
+        setPaths(root, world);
+
         for (Container container: leafNodes) {
             drawBox(container, world);
         }
 
-        setPaths(root, world);
     }
 
     private static int getOffset(int size){
@@ -160,7 +163,11 @@ public class WorldTree {
         // drawing the box/room , starting from the bottom to the top
         for (int i = boxY; i < boxY+boxH - 1; i++){
             for (int j = boxX; j < boxX+boxW - 1; j++) {
-                world[j][i] = Tileset.WALL;
+                if ((i == boxY || i == boxY + boxH - 2 || j == boxX || j == boxX + boxW - 2) && !world[j][i].description().equals("flower")){
+                    world[j][i] = Tileset.WALL;
+                }else{
+                    world[j][i] = Tileset.FLOOR;
+                }
             }
         }
 
@@ -218,7 +225,7 @@ public class WorldTree {
 
     private void joinHorizontal(int pivot, int p1, int p2, TETile[][] world){
         if (p1 > p2){
-            for (int i = p2; i < p1; i++){
+            for (int i = p2; i <= p1 + 2; i++){
                 if (world[pivot][i].description().equals("floor")){
                     continue;
                 }
@@ -227,7 +234,7 @@ public class WorldTree {
                 world[pivot - 1][i] = wallTile;
             }
         }else {
-            for (int i = p1; i < p2 ; i++){
+            for (int i = p1; i <= p2 + 2; i++){
                 if (world[pivot][i].description().equals("floor")){
                     continue;
                 }
@@ -240,8 +247,8 @@ public class WorldTree {
 
     private void joinVertical(int pivot, int p1, int p2, TETile[][] world){
         if (p1 > p2){
-            for (int i = p2; i < p1; i++){
-                if (world[i][pivot].description().equals("floor") || world[i][pivot].description().equals("wall")){
+            for (int i = p2; i <= p1 + 2; i++){
+                if (world[i][pivot].description().equals("floor") ){
                     continue;
                 }
                 world[i][pivot + 1] = wallTile;
@@ -249,8 +256,8 @@ public class WorldTree {
                 world[i][pivot - 1] = wallTile;
             }
         }else {
-            for (int i = p1; i < p2 ; i++){
-                if (world[i][pivot].description().equals("floor") || world[i][pivot].description().equals("wall")){
+            for (int i = p1; i <= p2 + 2 ; i++){
+                if (world[i][pivot].description().equals("floor") ){
                     continue;
                 }
                 world[i][pivot + 1] = wallTile;
@@ -269,7 +276,7 @@ public class WorldTree {
         WorldTree tree = new WorldTree(root);
         tree.setRandom(69420);
         // splitting and forming the tree
-        tree.makeSplit(5);
+        tree.makeSplit(3);
 
         // making the world array
         TETile[][] world = new TETile[WIDTH][HEIGHT];
