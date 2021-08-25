@@ -21,6 +21,7 @@ public class WorldTree {
     static final int HEIGHT = 50;
     static Random RANDOM;
     static final boolean displayPartitions = false;
+    static TETile pathTile = Tileset.WALL;
 
     WorldTree(Container r){
         root = r;
@@ -130,6 +131,8 @@ public class WorldTree {
         for (Container container: leafNodes) {
             drawBox(container, world);
         }
+
+        setPaths(root, world);
     }
 
     private static int getOffset(int size){
@@ -189,6 +192,48 @@ public class WorldTree {
         RANDOM = new Random(seed);
     }
 
+    void setPaths(Container base, TETile[][] world){
+        if (base.rChild == null || base.lChild == null){
+            return;
+        }
+        connectCenter(base.rChild, base.lChild, world);
+        setPaths(base.lChild, world);
+        setPaths(base.rChild, world);
+    }
+
+    private void connectCenter(Container r1, Container r2, TETile[][] world){
+        System.out.println(r1.center.x + " " + r1.center.y + " " + r2.center.x + " " + r2.center.y);
+        int r1x = r1.center.x;
+        int r1y = r1.center.y;
+        int r2x = r2.center.x;
+        int r2y = r2.center.y;
+        if (r1x == r2x){
+            if (r1y > r2y){
+                for (int i = r2y; i < r1y; i++){
+                    world[r2x][i] = pathTile;
+                }
+            }else {
+                for (int i = r1y; i < r2y ; i++){
+                    world[r1x][i] = pathTile;
+                }
+            }
+        }
+        if (r1y == r2y){
+            if (r1x > r2x){
+                for (int i = r2x; i < r1x ; i++){
+                    world[i][r2y] = pathTile;
+                }
+            }else {
+                for (int i = r1x; i < r2x ; i++){
+                    world[i][r2y] = pathTile;
+                }
+            }
+        }
+
+    }
+
+
+
     public static void main(String[] args) {
         TERenderer te = new TERenderer();
         te.initialize(WIDTH, HEIGHT);
@@ -197,7 +242,7 @@ public class WorldTree {
         WorldTree tree = new WorldTree(root);
         tree.setRandom(69420);
         // splitting and forming the tree
-        tree.makeSplit(6);
+        tree.makeSplit(5);
 
         // making the world array
         TETile[][] world = new TETile[WIDTH][HEIGHT];
@@ -209,6 +254,3 @@ public class WorldTree {
 }
 
 
-// make splittree
-// make rooms insteed of graph
-// change draw box
