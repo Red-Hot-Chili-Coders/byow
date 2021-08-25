@@ -21,7 +21,7 @@ public class WorldTree {
     static final int HEIGHT = 50;
     static Random RANDOM;
     static final boolean displayPartitions = false;
-    static TETile pathTile = Tileset.WALL;
+    static TETile pathTile = Tileset.FLOOR;
 
     WorldTree(Container r){
         root = r;
@@ -205,31 +205,39 @@ public class WorldTree {
         int r1y = r1.center.y;
         int r2x = r2.center.x;
         int r2y = r2.center.y;
+
         if (r1x == r2x){
-            if (r1y > r2y){
-                for (int i = r2y; i < r1y; i++){
-                    world[r2x][i] = pathTile;
-                }
-            }else {
-                for (int i = r1y; i < r2y ; i++){
-                    world[r1x][i] = pathTile;
-                }
-            }
+            joinHorizontal(r1x, r1y, r2y, world);
         }
         if (r1y == r2y){
-            if (r1x > r2x){
-                for (int i = r2x; i < r1x ; i++){
-                    world[i][r2y] = pathTile;
-                }
-            }else {
-                for (int i = r1x; i < r2x ; i++){
-                    world[i][r2y] = pathTile;
-                }
-            }
+            joinVertical(r1y, r1x, r2x, world);
         }
 
     }
 
+    private void joinHorizontal(int pivot, int p1, int p2, TETile[][] world){
+        if (p1 > p2){
+            for (int i = p2; i < p1; i++){
+                world[pivot][i] = pathTile;
+            }
+        }else {
+            for (int i = p1; i < p2 ; i++){
+                world[pivot][i] = pathTile;
+            }
+        }
+    }
+
+    private void joinVertical(int pivot, int p1, int p2, TETile[][] world){
+        if (p1 > p2){
+            for (int i = p2; i < p1; i++){
+                world[i][pivot] = pathTile;
+            }
+        }else {
+            for (int i = p1; i < p2 ; i++){
+                world[i][pivot] = pathTile;
+            }
+        }
+    }
 
 
     public static void main(String[] args) {
