@@ -20,6 +20,7 @@ public class WorldTree {
     static final int WIDTH = 100;
     static final int HEIGHT = 50;
     static Random RANDOM;
+    static final boolean displayPartitions = false;
 
     WorldTree(Container r){
         root = r;
@@ -27,25 +28,31 @@ public class WorldTree {
         leafNodes.add(root);
     }
 
-    // returns the proper spliting size , if the box cant be split
-    // according to the ratio , returns -1
-
-    int splitSize(int orignalSize, int orignalConstant, boolean isVertical) {
+    /**
+     * Calculates proper split size for the left subchild
+     * if it can find the size according to the raitos , it returns -1
+     * (it happens when iterations are over 10)
+     * @param leftVariable - leftchild's height or width, which needs to be randomly generated
+     * @param leftConstant - height or width , whichever is constant
+     * @param isVertical - is split is vertical
+     * @return split size for the left child , -1 if not possible (unfit according to the ratio)
+     */
+    private static int splitSize(int leftVariable, int leftConstant, boolean isVertical) {
 
         float ratio1;
         float ratio2;
 
         int iterations = 0;
-        while (iterations <= 20){
-            int leftSize = RANDOM.nextInt(orignalSize);
-            int rightSize = orignalSize - leftSize;
+        while (iterations <= 10){
+            int leftSize = RANDOM.nextInt(leftVariable);
+            int rightSize = leftVariable - leftSize;
 
             if (isVertical){
-                ratio1 = (float) leftSize/orignalConstant;
-                ratio2 = (float) rightSize/orignalConstant;
+                ratio1 = (float) leftSize/leftConstant;
+                ratio2 = (float) rightSize/leftConstant;
             }else{
-                ratio1 = (float) orignalConstant/leftSize;
-                ratio2 = (float) orignalConstant/rightSize;
+                ratio1 = (float) leftConstant/leftSize;
+                ratio2 = (float) leftConstant/rightSize;
             }
 
             if (ratio1 > 0.45 && ratio2 > 0.45){
@@ -57,12 +64,7 @@ public class WorldTree {
         return -1;
     }
 
-
-    // direction :  even for vertical , odd for horizontal
-    // iter : split iterations
-    // cache null nodes and create splits directly
-
-    void makeSplit(int iter){
+    private void makeSplit(int iter){
         long direction = RANDOM.nextInt();
 
         // default split : vertical
@@ -117,7 +119,7 @@ public class WorldTree {
     }
 
     // Draw the leaf nodes (rooms)
-    void generateWorld(TETile[][] world){
+    private void generateWorld(TETile[][] world){
 
         for (int i = 0; i < WIDTH; i++){
             for (int j = 0; j < HEIGHT; j++){
@@ -130,29 +132,57 @@ public class WorldTree {
         }
     }
 
-    void drawBox(Container container, TETile[][] world){
-        TETile t = Tileset.WALL;
+    private static int getOffset(int size){
+        if (size/3 != 0){
+            return RANDOM.nextInt(size/3);
+        }else{
+            return 0;
+        }
+    }
 
+    void drawBox(Container container, TETile[][] world){
         // if container is empty
         if (container.h == 0 || container.w == 0){
             return;
         }
 
-        // drawing both horizontal lines of the box
-        for (int i = container.x; i < container.x + container.w; i++){
-            world[i][container.y] = t;
+        TETile t = Tileset.WALL;
+        int offsetX = getOffset(container.w);
+        int offsetY = getOffset(container.h);
 
-            int upperHorizontalLineY = container.y + container.h - 1;
-            world[i][upperHorizontalLineY] = t;
+        int boxX = container.x + offsetX;
+        int boxY = container.y + offsetY;
+        int boxW = container.w - (boxX - container.x);
+        int boxH = container.h - (boxY - container.y);
+
+        // drawing the box/room , starting from the bottom to the top
+        for (int i = boxY; i < boxY+boxH - 1; i++){
+            for (int j = boxX; j < boxX+boxW - 1; j++) {
+                world[j][i] = Tileset.WALL;
+            }
         }
 
-        // drawing both vertical lines of the box
-        for (int i = container.y; i < container.y + container.h; i++){
-            world[container.x][i] = t;
+        // change the boolean displayPartitions to true
+        // if you want to see the partitions
+        if (displayPartitions){
+            world[container.center.x][container.center.y] = Tileset.LOCKED_DOOR;
+            // drawing both horizontal lines of the box
+            for (int i = container.x; i < container.x + container.w; i++){
+                world[i][container.y] = t;
 
-            int rightVerticalLineX = container.x + container.w - 1;
-            world[rightVerticalLineX][i] = t;
+                int upperHorizontalLineY = container.y + container.h - 1;
+                world[i][upperHorizontalLineY] = t;
+            }
+
+            // drawing both vertical lines of the box
+            for (int i = container.y; i < container.y + container.h; i++){
+                world[container.x][i] = t;
+
+                int rightVerticalLineX = container.x + container.w - 1;
+                world[rightVerticalLineX][i] = t;
+            }
         }
+
     }
 
     void setRandom(long seed){
@@ -167,7 +197,7 @@ public class WorldTree {
         WorldTree tree = new WorldTree(root);
         tree.setRandom(69420);
         // splitting and forming the tree
-        tree.makeSplit(5);
+        tree.makeSplit(6);
 
         // making the world array
         TETile[][] world = new TETile[WIDTH][HEIGHT];
@@ -177,3 +207,8 @@ public class WorldTree {
         te.renderFrame(world);
     }
 }
+
+
+// make splittree
+// make rooms insteed of graph
+// change draw box
