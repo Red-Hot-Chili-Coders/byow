@@ -4,10 +4,15 @@ package byow.Core;
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
+import jdk.jshell.execution.Util;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import static byow.Core.Path.setPaths;
+import static byow.Core.Room.drawBox;
+import static byow.Core.Utils.splitSize;
 
 public class WorldTree {
     /* Using a BSP to represent the world ,
@@ -18,7 +23,7 @@ public class WorldTree {
     Container root;
     List<Container> leafNodes;
     static final int WIDTH = 100;
-    static final int HEIGHT = 60;
+    static final int HEIGHT = 40;
     static Random RANDOM;
     static final boolean displayPartitions = false;
     static TETile pathTile = Tileset.FLOOR;
@@ -30,41 +35,6 @@ public class WorldTree {
         leafNodes.add(root);
     }
 
-    /**
-     * Calculates proper split size for the left subchild
-     * if it can't find the size according to the ratios , it returns -1
-     * (it happens when iterations are over 10)
-     * @param leftVariable - leftchild's height or width, which needs to be randomly generated
-     * @param leftConstant - height or width , whichever is constant
-     * @param isVertical - is split is vertical
-     * @return split size for the left child , -1 if not possible (unfit according to the ratio)
-     */
-    private static int splitSize(int leftVariable, int leftConstant, boolean isVertical) {
-
-        float ratio1;
-        float ratio2;
-
-        int iterations = 0;
-        while (iterations <= 10){
-            int leftSize = RANDOM.nextInt(leftVariable);
-            int rightSize = leftVariable - leftSize;
-
-            if (isVertical){
-                ratio1 = (float) leftSize/leftConstant;
-                ratio2 = (float) rightSize/leftConstant;
-            }else{
-                ratio1 = (float) leftConstant/leftSize;
-                ratio2 = (float) leftConstant/rightSize;
-            }
-
-            if (ratio1 > 0.45 && ratio2 > 0.45){
-                return leftSize;
-            }
-            iterations++;
-        }
-
-        return -1;
-    }
 
     private void makeSplit(int iter){
         long direction = RANDOM.nextInt();
@@ -134,160 +104,6 @@ public class WorldTree {
 
     }
 
-    private static int getOffset(int size){
-        if (size/3 != 0){
-            return RANDOM.nextInt(size/3);
-        }else{
-            return 0;
-        }
-    }
-
-    void drawBox(Container container, TETile[][] world){
-        // if container is empty
-        if (container.h == 0 || container.w == 0){
-            return;
-        }
-
-        TETile t = Tileset.WALL;
-        int offsetX = getOffset(container.w);
-        int offsetY = getOffset(container.h);
-
-        int boxX = container.x + offsetX;
-        int boxY = container.y + offsetY;
-        int boxW = container.w - (boxX - container.x);
-        int boxH = container.h - (boxY - container.y);
-
-        // drawing the box/room , starting from the bottom to the top
-        for (int i = boxY; i < boxY+boxH - 1; i++){
-            for (int j = boxX; j < boxX+boxW - 1; j++) {
-                if ((i == boxY || i == boxY + boxH - 2 || j == boxX || j == boxX + boxW - 2) && !world[j][i].description().equals("floor")){
-                    world[j][i] = Tileset.WALL;
-                }else{
-                    world[j][i] = Tileset.FLOOR;
-                }
-            }
-        }
-
-        // change the boolean displayPartitions to true
-        // if you want to see the partitions
-        if (displayPartitions){
-            world[container.center.x][container.center.y] = Tileset.LOCKED_DOOR;
-            // drawing both horizontal lines of the box
-            for (int i = container.x; i < container.x + container.w; i++){
-                world[i][container.y] = t;
-
-                int upperHorizontalLineY = container.y + container.h - 1;
-                world[i][upperHorizontalLineY] = t;
-            }
-
-            // drawing both vertical lines of the box
-            for (int i = container.y; i < container.y + container.h; i++){
-                world[container.x][i] = t;
-
-                int rightVerticalLineX = container.x + container.w - 1;
-                world[rightVerticalLineX][i] = t;
-            }
-        }
-
-    }
-
-    void setRandom(long seed){
-        RANDOM = new Random(seed);
-    }
-
-    void setPaths(Container base, TETile[][] world){
-        if (base.rChild == null || base.lChild == null){
-            return;
-        }
-        connectCenter(base.rChild, base.lChild, world);
-        setPaths(base.lChild, world);
-        setPaths(base.rChild, world);
-    }
-
-    private void connectCenter(Container r1, Container r2, TETile[][] world){
-        System.out.println(r1.center.x + " " + r1.center.y + " " + r2.center.x + " " + r2.center.y);
-        int r1x = r1.center.x;
-        int r1y = r1.center.y;
-        int r2x = r2.center.x;
-        int r2y = r2.center.y;
-
-        if (r1x == r2x){
-            joinVertical(r1x, r1y, r2y, world);
-        }
-
-        if (r1y == r2y){
-            joinHorizontal(r1y, r1x, r2x, world);
-        }
-
-    }
-
-    private void joinHorizontal(int pivot, int p1, int p2, TETile[][] world){
-        int start = 0;
-        int end = 0;
-        if (p1 > p2) {
-            start = p2;
-            end = p1;
-        }else{
-            start = p1;
-            end = p2;
-        }
-
-        if (pivot == HEIGHT - 1){
-            pivot-=1;
-        }else if (pivot == 0){
-            pivot+=1;
-        }
-
-        for (int i = start; i <= end; i++){
-            if (!world[i][pivot + 1].description().equals("floor")) {
-                world[i][pivot + 1] = wallTile;
-            }
-            if (!world[i][pivot].description().equals("floor")){
-                if (i==start || i==end){
-                    world[i][pivot] = wallTile;
-                }else{
-                    world[i][pivot] = pathTile;
-                }
-            }
-            if (!world[i][pivot - 1].description().equals("floor")){
-                world[i][pivot - 1] = wallTile;
-            }
-        }
-    }
-
-    private void joinVertical(int pivot, int p1, int p2, TETile[][] world){
-        int start = 0;
-        int end = 0;
-        if (p1 > p2) {
-            start = p2;
-            end = p1;
-        }else{
-            start = p1;
-            end = p2;
-        }
-
-        if (pivot == WIDTH - 1){
-            pivot-=1;
-        }else if (pivot == 0){
-            pivot+=1;
-        }
-
-        for (int i = start; i <= end; i++){
-            if (!world[pivot + 1][i].description().equals("floor")) {
-                world[pivot + 1][i] = wallTile;
-            }
-            if (!world[pivot][i].description().equals("floor")){
-                if (i==start || i==end){
-                    world[pivot][i] = wallTile;
-                }else{
-                    world[pivot][i] = pathTile;
-                }
-            }
-            if (!world[pivot - 1][i].description().equals("floor")){
-                world[pivot - 1][i] = wallTile;
-            }
-        }
-    }
 
 
     public static void main(String[] args) {
@@ -296,7 +112,7 @@ public class WorldTree {
 
         Container root = new Container(0,0,WIDTH,HEIGHT);
         WorldTree tree = new WorldTree(root);
-        tree.setRandom(69420);
+        RANDOM = new Random(69420);
         // splitting and forming the tree
         tree.makeSplit(5);
 
