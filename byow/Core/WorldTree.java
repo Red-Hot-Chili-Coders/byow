@@ -17,7 +17,7 @@ public class WorldTree {
 
     Container root;
     List<Container> leafNodes;
-    static final int WIDTH = 50;
+    static final int WIDTH = 100;
     static final int HEIGHT = 50;
     static Random RANDOM;
 
@@ -36,7 +36,7 @@ public class WorldTree {
         float ratio2;
 
         int iterations = 0;
-        while (iterations <= 10){
+        while (iterations <= 20){
             int leftSize = RANDOM.nextInt(orignalSize);
             int rightSize = orignalSize - leftSize;
 
@@ -76,7 +76,8 @@ public class WorldTree {
                 continue;
             }
 
-            if (direction % 2 == 0){
+            // if width is bigger than the height, split vertically
+            if ((float) c.w/c.h > 1){
 
                 int leftWidth = splitSize(c.w, c.h, true);
                 if (leftWidth < 0){
@@ -93,7 +94,7 @@ public class WorldTree {
                 newLeafNodes.add(left);
                 newLeafNodes.add(right);
 
-
+                // if width is smaller than the height, split horizontally
             }else {
                 int leftWidth = c.w;
                 int rightWidth = c.w;
@@ -166,7 +167,7 @@ public class WorldTree {
         WorldTree tree = new WorldTree(root);
         tree.setRandom(69420);
         // splitting and forming the tree
-        tree.makeSplit(6);
+        tree.makeSplit(5);
 
         // making the world array
         TETile[][] world = new TETile[WIDTH][HEIGHT];
