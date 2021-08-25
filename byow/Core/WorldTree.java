@@ -31,7 +31,7 @@ public class WorldTree {
 
     /**
      * Calculates proper split size for the left subchild
-     * if it can find the size according to the raitos , it returns -1
+     * if it can't find the size according to the ratios , it returns -1
      * (it happens when iterations are over 10)
      * @param leftVariable - leftchild's height or width, which needs to be randomly generated
      * @param leftConstant - height or width , whichever is constant
@@ -79,9 +79,13 @@ public class WorldTree {
                 continue;
             }
 
-            // if width is bigger than the height, split vertically
-            if ((float) c.w/c.h > 1){
+            Container left;
+            Container right;
 
+            // if width is bigger than the height, split vertically
+            // else horizontally
+
+            if ((float) c.w/c.h > 1){
                 int leftWidth = splitSize(c.w, c.h, true);
                 if (leftWidth < 0){
                     continue;
@@ -90,30 +94,24 @@ public class WorldTree {
                 int leftHeight = c.h;
                 int righttHeight= c.h;
 
-                Container left = new Container(c.x, c.y, leftWidth, leftHeight);
-                Container right = new Container(c.x + left.w, c.y, rightWidth , righttHeight);
-                c.lChild = left;
-                c.rChild = right;
-                newLeafNodes.add(left);
-                newLeafNodes.add(right);
-
-                // if width is smaller than the height, split horizontally
+                left = new Container(c.x, c.y, leftWidth, leftHeight);
+                right = new Container(c.x + left.w, c.y, rightWidth , righttHeight);
             }else {
-                int leftWidth = c.w;
-                int rightWidth = c.w;
                 int leftHeight = splitSize(c.h, c.w, false);
                 if (leftHeight < 0){
                     continue;
                 }
                 int rightHeight = c.h - leftHeight;
+                int leftWidth = c.w;
+                int rightWidth = c.w;
 
-                Container left = new Container(c.x, c.y, leftWidth, leftHeight);
-                Container right = new Container(c.x , c.y + left.h, rightWidth, rightHeight);
-                c.lChild = left;
-                c.rChild = right;
-                newLeafNodes.add(left);
-                newLeafNodes.add(right);
+                left = new Container(c.x, c.y, leftWidth, leftHeight);
+                right = new Container(c.x , c.y + left.h, rightWidth, rightHeight);
             }
+            c.lChild = left;
+            c.rChild = right;
+            newLeafNodes.add(left);
+            newLeafNodes.add(right);
         }
         leafNodes = newLeafNodes;
         makeSplit(iter - 1);
