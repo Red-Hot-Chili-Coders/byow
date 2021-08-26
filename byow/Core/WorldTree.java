@@ -107,21 +107,36 @@ public class WorldTree {
     }
 
     public Player generatePlayer(){
+        int playerX = -1;
+        int playerY = -1;
+
         Container randomRoom = getRandomRoom();
-        player = new Player(randomRoom.center.x, randomRoom.center.y, Tileset.AVATAR);
+        for (int i = randomRoom.x; i < randomRoom.w; i++){
+            for (int j = randomRoom.y; j < randomRoom.h; j++) {
+                if (world[i][j].description().equals("floor")){
+                    playerX = i;
+                    playerY = j;
+                    break;
+                }
+            }
+        }
+
+        // if selected room has no floors (might happen in some rare case)
+        // then call the functino recursively, until we find better room
+
+        if (playerX == -1){
+            return generatePlayer();
+        }
+
+        player = new Player(playerX, playerY, Tileset.AVATAR);
         return player;
     }
 
-
     private Container getRandomRoom(){
-    /*gets valid room where our initial character can be*/
+        /*gets valid room where our initial character can be*/
         Container randomRoom = leafNodes.get(RANDOM.nextInt(leafNodes.size()));
-        while (world[randomRoom.x][randomRoom.y].description().equals("wall")){
-            randomRoom = leafNodes.get(RANDOM.nextInt(leafNodes.size()));
-        }
         return randomRoom;
     }
-
 
     public static void main(String[] args) {
         WorldTree tree = new WorldTree("N69420S");

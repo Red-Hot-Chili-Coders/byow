@@ -17,9 +17,6 @@ public class Utils {
      * @param isVertical - is split is vertical
      * @return split size for the left child , -1 if not possible (unfit according to the ratio)
      */
-    static void displaySetup(){
-    }
-
     static int splitSize(int leftVariable, int leftConstant, boolean isVertical, Random RANDOM) {
 
         float ratio1;

@@ -76,7 +76,6 @@ public class Interaction {
             switch (initCommand) {
                 case "n":
                     renderWorld();
-                    // todo: add the methods for player interactivity here
                     inMenu = false;
                     break;
                 case "L":
@@ -96,9 +95,13 @@ public class Interaction {
     void renderWorld() throws InterruptedException {
         // renders game initially , gameOver boolean added for future
         boolean gameOver = false;
-        WorldTree worldTree = new WorldTree(enterSeed());
+
+        // todo: change this !, seed is hardcoded for convience
+        WorldTree worldTree = new WorldTree("n123s");
+        // WorldTree worldTree = new WorldTree(enterSeed());
         world = worldTree.generateWorld();
         player = worldTree.generatePlayer();
+
         updatePlayerPos();
         te.renderFrame(world);
 
