@@ -2,28 +2,30 @@ package byow.Core;
 
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
+import byow.TileEngine.Tileset;
 import edu.princeton.cs.introcs.StdDraw;
 
 import java.awt.*;
-import java.util.Locale;
 
 public class Interaction {
     WorldTree t;
     TETile[][] world;
+    Player player;
     TERenderer te;
+
     public Interaction() {
         te = new TERenderer();
         te.initialize(WorldTree.WIDTH, WorldTree.HEIGHT);
     }
 
-    void welcomeScreen(){
+    void welcomeScreen() {
         StdDraw.clear(Color.BLACK);
         StdDraw.setPenRadius();
         StdDraw.setPenColor(Color.white);
-        StdDraw.text((double)WorldTree.WIDTH/2,30,"CS61B The Game");
-        StdDraw.text((double)WorldTree.WIDTH/2,25,"New Game (N)");
-        StdDraw.text((double)WorldTree.WIDTH/2,20,"Load Game (L)");
-        StdDraw.text((double)WorldTree.WIDTH/2,15,"Quit (Q)");
+        StdDraw.text((double) WorldTree.WIDTH / 2, 30, "CS61B The Game");
+        StdDraw.text((double) WorldTree.WIDTH / 2, 25, "New Game (N)");
+        StdDraw.text((double) WorldTree.WIDTH / 2, 20, "Load Game (L)");
+        StdDraw.text((double) WorldTree.WIDTH / 2, 15, "Quit (Q)");
 
         StdDraw.show();
     }
@@ -40,12 +42,12 @@ public class Interaction {
         }
     }
 
-    void seedScreen(String seed){
+    void seedScreen(String seed) {
         StdDraw.clear(Color.BLACK);
         StdDraw.setPenRadius();
         StdDraw.setPenColor(Color.white);
-        StdDraw.text((double)WorldTree.WIDTH/2,30,"Enter a random seed, (start with N and end with S!)");
-        StdDraw.text((double)WorldTree.WIDTH/2,25,seed);
+        StdDraw.text((double) WorldTree.WIDTH / 2, 30, "Enter a random seed, (start with N and end with S!)");
+        StdDraw.text((double) WorldTree.WIDTH / 2, 25, seed);
         StdDraw.show();
     }
 
@@ -55,7 +57,7 @@ public class Interaction {
         String input = "";
 
         seedScreen("");
-        while (!input.equals("S")){
+        while (!input.equals("S")) {
             input = listenForCommand(1).toUpperCase();
             seed.append(input);
             seedScreen(seed.toString());
@@ -66,17 +68,14 @@ public class Interaction {
 
     void startGame() throws InterruptedException {
         boolean inMenu = true;
-        while(inMenu){
+        while (inMenu) {
             welcomeScreen();
             // specify length of input expected
             String initCommand = listenForCommand(1);
             System.out.println(initCommand);
             switch (initCommand) {
                 case "n":
-                    WorldTree worldTree = new WorldTree(enterSeed());
-                    TETile[][] world = worldTree.generateWorld();
-                    te.renderFrame(world);
-
+                    renderWorld();
                     // todo: add the methods for player interactivity here
                     inMenu = false;
                     break;
@@ -94,16 +93,95 @@ public class Interaction {
         }
     }
 
+    void renderWorld() throws InterruptedException {
+        // renders game initially , gameOver boolean added for future
+        boolean gameOver = false;
+        WorldTree worldTree = new WorldTree(enterSeed());
+        world = worldTree.generateWorld();
+        player = worldTree.generatePlayer();
+        updatePlayerPos();
+        te.renderFrame(world);
+
+        //Continuously listens for movement commands and
+        //validatesAndUpdates player positon
+        while (!gameOver) {
+            String move = listenForCommand(1);
+            System.out.println(move);
+            validateAndMakeMove(move);
+            te.renderFrame(world);
+        }
+
+    }
+
+    // renders player on map
+    // player position is updated within validateAndMakeMove
+    private void updatePlayerPos() {
+        world[player.x][player.y] = player.tile;
+    }
+
+    // checks if move is valid using validate helper
+    // player movement process
+    // => reverse existing tile to floor
+    // => render player again (based on its new position)
+    private void validateAndMakeMove(String direction) {
+        if (validateMove(direction)) {
+            switch (direction) {
+                case "w":
+                    reversePlayerTile();
+                    player.y += 1;
+                    break;
+                case "a":
+                    reversePlayerTile();
+                    player.x -= 1;
+                    break;
+                case "s":
+                    reversePlayerTile();
+                    player.y -= 1;
+                    break;
+                case "d":
+                    reversePlayerTile();
+                    player.x += 1;
+                    break;
+            }
+            updatePlayerPos();
+        }
+    }
+
+    // checks if move is possible , that is a tile exists
+    // at the intended position
+    // statement 1 : validates if move goes out of map or not
+    // statement 2 : if intended move will land on a floor
+    private boolean validateMove (String direction){
+        return switch (direction) {
+            case "w" -> player.y + 1 < WorldTree.HEIGHT &&
+                    world[player.x][player.y + 1].description().equals("floor");
+            case "a" -> player.x - 1 >= 0 &&
+                    world[player.x - 1][player.y].description().equals("floor");
+            case "s" -> player.y - 1 >= 0 &&
+                    world[player.x][player.y - 1].description().equals("floor");
+            case "d" -> player.x + 1 < WorldTree.WIDTH &&
+                    world[player.x + 1][player.y].description().equals("floor");
+            default -> false;
+        };
+    }
+
+    // reversed player tile to floor tile
+    // intermediate function in making move
+    private void reversePlayerTile(){
+        world[player.x][player.y] = Tileset.FLOOR;
+    }
+
     // Listens from "n" inputs and returns the whole string
-    public String listenForCommand(int n) {
+    public String listenForCommand ( int n){
         StringBuilder s = new StringBuilder();
         int total = n;
-        while (total!=0){
-            if (StdDraw.hasNextKeyTyped()){
+        while (total != 0) {
+            if (StdDraw.hasNextKeyTyped()) {
                 s.append(StdDraw.nextKeyTyped());
-                total-=1;
+                total -= 1;
             }
         }
         return s.toString();
     }
 }
+

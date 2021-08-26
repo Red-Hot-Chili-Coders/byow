@@ -21,6 +21,7 @@ public class WorldTree {
 
     Container root;
     List<Container> leafNodes;
+    Player player;
     static final int WIDTH = 80;
     static final int HEIGHT = 40;
     int seed;
@@ -104,6 +105,23 @@ public class WorldTree {
 
         return world;
     }
+
+    public Player generatePlayer(){
+        Container randomRoom = getRandomRoom();
+        player = new Player(randomRoom.center.x, randomRoom.center.y, Tileset.AVATAR);
+        return player;
+    }
+
+
+    private Container getRandomRoom(){
+    /*gets valid room where our initial character can be*/
+        Container randomRoom = leafNodes.get(RANDOM.nextInt(leafNodes.size()));
+        while (world[randomRoom.x][randomRoom.y].description().equals("wall")){
+            randomRoom = leafNodes.get(RANDOM.nextInt(leafNodes.size()));
+        }
+        return randomRoom;
+    }
+
 
     public static void main(String[] args) {
         WorldTree tree = new WorldTree("N69420S");
