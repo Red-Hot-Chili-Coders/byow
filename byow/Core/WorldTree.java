@@ -24,9 +24,6 @@ public class WorldTree {
     static final int WIDTH = 40;
     static final int HEIGHT = 40;
     static Random RANDOM;
-    static final boolean displayPartitions = false;
-    static TETile pathTile = Tileset.FLOOR;
-    static TETile wallTile = Tileset.WALL;
 
     WorldTree(){
         root = new Container(0,0, WIDTH, HEIGHT);
@@ -36,8 +33,6 @@ public class WorldTree {
 
 
      void makeSplit(int iter){
-        long direction = RANDOM.nextInt();
-
         // default split : vertical
         if (iter == 0){
             return;
@@ -91,7 +86,7 @@ public class WorldTree {
      void generateWorld(TETile[][] world){
         for (int i = 0; i < WIDTH; i++){
             for (int j = 0; j < HEIGHT; j++){
-                world[i][j] = Tileset.MOUNTAIN;
+                world[i][j] = Tileset.NOTHING;
             }
         }
 
@@ -102,8 +97,6 @@ public class WorldTree {
         }
 
     }
-
-
 
     public static void main(String[] args) {
         TERenderer te = new TERenderer();

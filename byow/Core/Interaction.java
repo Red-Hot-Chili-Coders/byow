@@ -22,8 +22,6 @@ public class Interaction {
 
     }
 
-
-
     void startGame() throws InterruptedException {
         while(true){
             welcomeScreen();
@@ -36,12 +34,15 @@ public class Interaction {
                 //load game
             }else if (initCommand.equals("q")){
                 // exit
-                StdDraw.clear(StdDraw.BLACK);
-                StdDraw.setPenColor(Color.WHITE);
-                StdDraw.setPenRadius();
-                StdDraw.text((double)WorldTree.WIDTH/2,(double) WorldTree.HEIGHT/4,"Game Exited , restarting in 5 seconds");
-                StdDraw.show();
-                Thread.sleep(5000);
+                for (int i = 5; i > 0; i--){
+                    StdDraw.clear(StdDraw.BLACK);
+                    StdDraw.setPenColor(Color.WHITE);
+                    StdDraw.setPenRadius();
+                    StdDraw.text((double)WorldTree.WIDTH/2,(double) WorldTree.HEIGHT/4,"Game Exited , restarting in " + i + " seconds");
+                    StdDraw.show();
+                    Thread.sleep(1000);
+                    StdDraw.clear();
+                }
             }else if (initCommand.equals("r")){
                 welcomeScreen();
             }
@@ -53,9 +54,9 @@ public class Interaction {
         StdDraw.setPenRadius();
         StdDraw.setPenColor(Color.white);
         StdDraw.text((double)WorldTree.WIDTH/2,30,"CS61B The Game");
-        StdDraw.text((double)WorldTree.WIDTH/2,25,"New Game(N)");
-        StdDraw.text((double)WorldTree.WIDTH/2,20,"Load Game(L)");
-        StdDraw.text((double)WorldTree.WIDTH/2,15,"Quit Game(Q)");
+        StdDraw.text((double)WorldTree.WIDTH/2,25,"New Game (N)");
+        StdDraw.text((double)WorldTree.WIDTH/2,20,"Load Game (L)");
+        StdDraw.text((double)WorldTree.WIDTH/2,15,"Quit (Q)");
 
         StdDraw.show();
     }
