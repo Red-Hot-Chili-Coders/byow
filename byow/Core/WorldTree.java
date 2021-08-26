@@ -4,7 +4,6 @@ package byow.Core;
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
-import jdk.jshell.execution.Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,21 +21,21 @@ public class WorldTree {
 
     Container root;
     List<Container> leafNodes;
-    static final int WIDTH = 100;
+    static final int WIDTH = 40;
     static final int HEIGHT = 40;
     static Random RANDOM;
     static final boolean displayPartitions = false;
     static TETile pathTile = Tileset.FLOOR;
     static TETile wallTile = Tileset.WALL;
 
-    WorldTree(Container r){
-        root = r;
+    WorldTree(){
+        root = new Container(0,0, WIDTH, HEIGHT);
         leafNodes = new ArrayList<>();
         leafNodes.add(root);
     }
 
 
-    private void makeSplit(int iter){
+     void makeSplit(int iter){
         long direction = RANDOM.nextInt();
 
         // default split : vertical
@@ -89,10 +88,10 @@ public class WorldTree {
     }
 
     // Draw the leaf nodes (rooms)
-    private void generateWorld(TETile[][] world){
+     void generateWorld(TETile[][] world){
         for (int i = 0; i < WIDTH; i++){
             for (int j = 0; j < HEIGHT; j++){
-                world[i][j] = Tileset.NOTHING;
+                world[i][j] = Tileset.MOUNTAIN;
             }
         }
 
@@ -110,8 +109,7 @@ public class WorldTree {
         TERenderer te = new TERenderer();
         te.initialize(WIDTH, HEIGHT);
 
-        Container root = new Container(0,0,WIDTH,HEIGHT);
-        WorldTree tree = new WorldTree(root);
+        WorldTree tree = new WorldTree();
         RANDOM = new Random(69420);
         // splitting and forming the tree
         tree.makeSplit(5);
