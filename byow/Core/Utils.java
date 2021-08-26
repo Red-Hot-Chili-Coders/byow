@@ -1,6 +1,11 @@
 package byow.Core;
 
-import static byow.Core.WorldTree.RANDOM;
+import byow.TileEngine.TERenderer;
+
+import java.util.Random;
+
+import static byow.Core.WorldTree.HEIGHT;
+import static byow.Core.WorldTree.WIDTH;
 
 public class Utils {
     /**
@@ -12,7 +17,10 @@ public class Utils {
      * @param isVertical - is split is vertical
      * @return split size for the left child , -1 if not possible (unfit according to the ratio)
      */
-    static int splitSize(int leftVariable, int leftConstant, boolean isVertical) {
+    static void displaySetup(){
+    }
+
+    static int splitSize(int leftVariable, int leftConstant, boolean isVertical, Random RANDOM) {
 
         float ratio1;
         float ratio2;
@@ -38,7 +46,8 @@ public class Utils {
 
         return -1;
     }
-    static int getOffset(int size){
+
+    static int getOffset(int size, Random RANDOM){
         int factor = 2;
         if (size/factor != 0){
             return RANDOM.nextInt(size/factor);
@@ -46,4 +55,34 @@ public class Utils {
             return 0;
         }
     }
+
+
+    static int validateSeed(String seed){
+        int numericSeed = 69420;
+        // default seed
+        if (seed == null){
+            return numericSeed;
+        }
+
+        seed = seed.toUpperCase();
+
+        // validating the format
+        if (seed.charAt(0) != 'N' && seed.charAt(seed.length() - 1) == 'S'){
+            System.out.println("Invalid seed (format - \"N<numeric seed>S\"  )");
+            System.exit(0);
+        }
+
+        // obtaining the numeric value from the seed , and validating it
+        seed = seed.substring(1,seed.length() - 1);
+
+        try {
+            numericSeed = Integer.parseInt(seed);
+        } catch (NumberFormatException e){
+            System.out.println("Seed should be numeric ! (format - \"N<numeric seed>S\"  )");
+            System.exit(0);
+        }
+
+        return numericSeed;
+    }
+
 }

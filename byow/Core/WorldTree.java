@@ -11,7 +11,7 @@ import java.util.Random;
 
 import static byow.Core.Path.setPaths;
 import static byow.Core.Room.drawBox;
-import static byow.Core.Utils.splitSize;
+import static byow.Core.Utils.*;
 
 public class WorldTree {
     /* Using a BSP to represent the world ,
@@ -21,11 +21,16 @@ public class WorldTree {
 
     Container root;
     List<Container> leafNodes;
-    static final int WIDTH = 40;
+    static final int WIDTH = 80;
     static final int HEIGHT = 40;
-    static Random RANDOM;
+    int seed;
+    TETile[][] world;
+    Random RANDOM;
 
-    WorldTree(){
+    WorldTree(String seed){
+        this.seed = validateSeed(seed);
+        RANDOM = new Random(this.seed);
+        world = new TETile[WIDTH][HEIGHT];
         root = new Container(0,0, WIDTH, HEIGHT);
         leafNodes = new ArrayList<>();
         leafNodes.add(root);
@@ -51,7 +56,7 @@ public class WorldTree {
             // else horizontally
 
             if ((float) c.w/c.h > 1){
-                int leftWidth = splitSize(c.w, c.h, true);
+                int leftWidth = splitSize(c.w, c.h, true, RANDOM);
                 if (leftWidth < 0){
                     continue;
                 }
@@ -62,7 +67,7 @@ public class WorldTree {
                 left = new Container(c.x, c.y, leftWidth, leftHeight);
                 right = new Container(c.x + left.w, c.y, rightWidth , righttHeight);
             }else {
-                int leftHeight = splitSize(c.h, c.w, false);
+                int leftHeight = splitSize(c.h, c.w, false, RANDOM);
                 if (leftHeight < 0){
                     continue;
                 }
@@ -83,7 +88,8 @@ public class WorldTree {
     }
 
     // Draw the leaf nodes (rooms)
-     void generateWorld(TETile[][] world){
+     public TETile[][] generateWorld(){
+        makeSplit(5);
         for (int i = 0; i < WIDTH; i++){
             for (int j = 0; j < HEIGHT; j++){
                 world[i][j] = Tileset.NOTHING;
@@ -93,25 +99,18 @@ public class WorldTree {
         setPaths(root, world);
 
         for (Container container: leafNodes) {
-            drawBox(container, world);
+            drawBox(container, world, RANDOM);
         }
 
+        return world;
     }
 
     public static void main(String[] args) {
+        WorldTree tree = new WorldTree("N69420S");
+        TETile[][] world = tree.generateWorld();
+
         TERenderer te = new TERenderer();
         te.initialize(WIDTH, HEIGHT);
-
-        WorldTree tree = new WorldTree();
-        RANDOM = new Random(69420);
-        // splitting and forming the tree
-        tree.makeSplit(5);
-
-        // making the world array
-        TETile[][] world = new TETile[WIDTH][HEIGHT];
-        tree.generateWorld(world);
-
-        // rendering the world array
         te.renderFrame(world);
     }
 }

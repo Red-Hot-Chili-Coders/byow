@@ -3,21 +3,21 @@ package byow.Core;
 import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
 
+import java.util.Random;
+
 import static byow.Core.Utils.getOffset;
-import static byow.Core.WorldTree.RANDOM;
 
 public class Room {
 
 
-    static void drawBox(Container container, TETile[][] world){
+    static void drawBox(Container container, TETile[][] world, Random RANDOM){
         // if container is empty
         if (container.h == 0 || container.w == 0){
             return;
         }
 
-        TETile t = Tileset.WALL;
-        int offsetX = getOffset(container.w);
-        int offsetY = getOffset(container.h);
+        int offsetX = getOffset(container.w, RANDOM);
+        int offsetY = getOffset(container.h, RANDOM);
 
         int boxX = container.x + offsetX;
         int boxY = container.y + offsetY;
