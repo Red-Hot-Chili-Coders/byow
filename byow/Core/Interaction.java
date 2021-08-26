@@ -8,14 +8,15 @@ import edu.princeton.cs.introcs.StdDraw;
 import java.awt.*;
 
 public class Interaction {
-    WorldTree t;
     TETile[][] world;
     Player player;
     TERenderer te;
+    int mouseX;
+    int mouseY;
 
     public Interaction() {
         te = new TERenderer();
-        te.initialize(WorldTree.WIDTH, WorldTree.HEIGHT);
+        te.initialize(WorldTree.WIDTH, WorldTree.HEIGHT+4);
     }
 
     void welcomeScreen() {
@@ -28,6 +29,7 @@ public class Interaction {
         StdDraw.text((double) WorldTree.WIDTH / 2, 15, "Quit (Q)");
 
         StdDraw.show();
+
     }
 
     void exit() throws InterruptedException {
@@ -58,7 +60,7 @@ public class Interaction {
 
         seedScreen("");
         while (!input.equals("S")) {
-            input = listenForCommand(1).toUpperCase();
+            input = listenForCommand().toUpperCase();
             seed.append(input);
             seedScreen(seed.toString());
         }
@@ -70,8 +72,7 @@ public class Interaction {
         boolean inMenu = true;
         while (inMenu) {
             welcomeScreen();
-            // specify length of input expected
-            String initCommand = listenForCommand(1);
+            String initCommand = listenForCommand();
             System.out.println(initCommand);
             switch (initCommand) {
                 case "n":
@@ -93,27 +94,23 @@ public class Interaction {
     }
 
     void renderWorld() throws InterruptedException {
-        // renders game initially , gameOver boolean added for future
         boolean gameOver = false;
 
-        // todo: change this !, seed is hardcoded for convience
         WorldTree worldTree = new WorldTree("n123s");
         // WorldTree worldTree = new WorldTree(enterSeed());
+
         world = worldTree.generateWorld();
         player = worldTree.generatePlayer();
 
         updatePlayerPos();
         te.renderFrame(world);
 
-        //Continuously listens for movement commands and
-        //validatesAndUpdates player positon
         while (!gameOver) {
-            String move = listenForCommand(1);
-            System.out.println(move);
+            showMouseInfo();
+            String move = listenForCommand();
             validateAndMakeMove(move);
             te.renderFrame(world);
         }
-
     }
 
     // renders player on map
@@ -174,16 +171,36 @@ public class Interaction {
         world[player.x][player.y] = Tileset.FLOOR;
     }
 
-    // Listens from "n" inputs and returns the whole string
-    public String listenForCommand ( int n){
+    public void showMouseInfo() throws InterruptedException {
+        //when the user lets go of the button, send the mouse coordinates to the variables.
+        // the game loops stays frozen for 500 ms , i fried my brains out , but i cant implement async function.
+        // #StdDraw.thisLibraryIsShitAlthoughIstillRespectJava
+
+        if (!StdDraw.isMousePressed()){
+            return;
+        }
+
+        if (mouseX == StdDraw.mouseX() && mouseY == StdDraw.mouseY()){
+            return;
+        }
+
+        mouseX = (int) StdDraw.mouseX();
+        mouseY = (int) StdDraw.mouseY();
+
+        if (mouseX < WorldTree.WIDTH && mouseY < WorldTree.HEIGHT){
+            System.out.println("set" + mouseX + " " + mouseY);
+            StdDraw.text(3, WorldTree.HEIGHT + 3, world[mouseX][mouseY].description());
+            StdDraw.show();
+            Thread.sleep(350);
+            StdDraw.clear();
+        }
+    }
+
+    public String listenForCommand (){
         StringBuilder s = new StringBuilder();
-        int total = n;
-        while (total != 0) {
             if (StdDraw.hasNextKeyTyped()) {
                 s.append(StdDraw.nextKeyTyped());
-                total -= 1;
             }
-        }
         return s.toString();
     }
 }
