@@ -108,7 +108,7 @@ public class Interaction {
     void renderWorld() throws InterruptedException {
         gameOver = false;
 
-        WorldTree worldTree = new WorldTree("n123s");
+        WorldTree worldTree = new WorldTree("n1234s");
         // WorldTree worldTree = new WorldTree(enterSeed());
 
         world = worldTree.generateWorld();
@@ -171,8 +171,6 @@ public class Interaction {
         for (Player npc : npcArray){
             if (world[npc.x][npc.y] == player.tile){
                 gameOver = true;
-            }else if (world[npc.x][npc.y] == Tileset.FLOWER) {
-                continue;
             }
             world[npc.x][npc.y] = npc.tile;
         }

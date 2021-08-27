@@ -58,6 +58,10 @@ public class Utils {
             return false;
         }
 
+        if (world[x][y] == Tileset.FLOWER && character.tile == Tileset.MOUNTAIN){
+            return false;
+        }
+
         return true;
     }
 

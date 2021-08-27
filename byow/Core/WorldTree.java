@@ -133,7 +133,7 @@ public class WorldTree {
 
     public ArrayList<Player> generateNPC(){
         ArrayList<Player> npcArray = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 20; i++) {
             int[] coordinates = getRandomCoordinates();
             Player npc = new Player(coordinates[0], coordinates[1], Tileset.MOUNTAIN);
             npcArray.add(npc);
