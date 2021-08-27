@@ -5,6 +5,7 @@ import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
 import edu.princeton.cs.introcs.StdDraw;
 
+import java.awt.*;
 import java.util.Random;
 public class Utils {
 
@@ -67,7 +68,8 @@ public class Utils {
     }
 
     public static void showCollectibleStats(TETile[][] world, int CollectiblesLeft, int Collectibles){
-        StdDraw.text(10, WorldTree.HEIGHT + 3, "Collectibles left to collect : " + CollectiblesLeft + "/" + Collectibles);
+        StdDraw.setPenColor(Color.white);
+        StdDraw.text(10, WorldTree.HEIGHT + 2, "Collectibles left to collect : " + CollectiblesLeft + "/" + Collectibles);
         StdDraw.show();
         StdDraw.clear();
     }
