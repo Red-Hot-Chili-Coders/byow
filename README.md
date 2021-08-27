@@ -7,3 +7,4 @@ The main aim of this project was to design a world generation algorithm , put it
 World generation is done by [binary space partitioning](https://en.wikipedia.org/wiki/Binary_space_partitioning).
 
 # Screenshots
+![](byow.png)
