@@ -146,13 +146,22 @@ public class WorldTree {
         int x = RANDOM.nextInt(WIDTH);
         int y = RANDOM.nextInt(HEIGHT);
 
-        while (world[x][y] != Tileset.FLOOR){
-            x = RANDOM.nextInt(WIDTH);
-            y = RANDOM.nextInt(HEIGHT);
+        if (!world[x][y].description().equals("floor")){
+            return getRandomCoordinates();
         }
 
         return new int[]{x, y};
 
+    }
+
+    public void generateCollectibles(){
+        for (int i = 0; i < 7; i++){
+            int[] collectibleLocation = getRandomCoordinates();
+            int collectibleX = collectibleLocation[0];
+            int collectibley = collectibleLocation[1];
+
+            world[collectibleX][collectibley] = Tileset.FLOWER;
+        }
     }
 
     private Container getRandomRoom(){

@@ -112,21 +112,28 @@ public class Interaction {
         // WorldTree worldTree = new WorldTree(enterSeed());
 
         world = worldTree.generateWorld();
-        player = worldTree.generatePlayer();
-        npcArray = worldTree.generateNPC();
 
+        player = worldTree.generatePlayer();
         updatePlayerPos();
+
+        npcArray = worldTree.generateNPC();
         updateNPCPos();
+
+        worldTree.generateCollectibles();
         te.renderFrame(world);
 
         while (!gameOver) {
+            // check if user has clicked any tile for info
             showMouseInfo(world);
-            moveNPCs();
-            String move = listenForCommand();
 
-            // player movement
+            // move npcs
+            moveNPCs();
+
+            // player movement+
+            String move = listenForCommand();
             validateAndMakeMove(move, player, world);
             updatePlayerPos();
+
             te.renderFrame(world);
         }
     }
