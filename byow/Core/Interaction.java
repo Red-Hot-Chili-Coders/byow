@@ -6,6 +6,8 @@ import byow.TileEngine.Tileset;
 import edu.princeton.cs.introcs.StdDraw;
 
 import java.awt.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -18,6 +20,9 @@ public class Interaction {
     TERenderer te;
     int mouseX;
     int mouseY;
+
+    long nano;
+    boolean gameOver;
 
     public Interaction() {
         te = new TERenderer();
@@ -100,7 +105,7 @@ public class Interaction {
     }
 
     void renderWorld() throws InterruptedException {
-        boolean gameOver = false;
+        gameOver = false;
 
         WorldTree worldTree = new WorldTree("n123s");
         // WorldTree worldTree = new WorldTree(enterSeed());
@@ -114,12 +119,11 @@ public class Interaction {
         te.renderFrame(world);
 
         while (!gameOver) {
+            System.out.println("game on");
             showMouseInfo();
-
             moveNPCs();
             String move = listenForCommand();
             // player movement
-            Thread.sleep(500);
             validateAndMakeMove(move, player);
             updatePlayerPos();
             te.renderFrame(world);
@@ -128,10 +132,14 @@ public class Interaction {
 
     // renders player on map
     // player position is updated within validateAndMakeMove
-
-
     private void updatePlayerPos() {
-        world[player.x][player.y] = player.tile;
+        // checks if walking into a npc : if yes game over with players grave being shown
+        if (world[player.x][player.y] == Tileset.MOUNTAIN){
+            gameOver = true;
+            world[player.x][player.y] = Tileset.SAND;
+        }else {
+            world[player.x][player.y] = Tileset.AVATAR;
+        }
     }
 
     private void updateNPCPos(){
@@ -145,6 +153,13 @@ public class Interaction {
     }
 
     public void moveNPCs(){
+        LocalDateTime date = LocalDateTime.now();
+        long currentTime = date.toLocalTime().toNanoOfDay();
+        if (currentTime - nano < 500000000){
+            return;
+        }
+        nano = currentTime;
+
         String[] moves = new String[]{"w", "a", "s", "d"};
         for (Player npc : npcArray){
             String move = moves[RANDOM.nextInt(4)];
@@ -184,16 +199,21 @@ public class Interaction {
     // at the intended position
     // statement 1 : validates if move goes out of map or not
     // statement 2 : if intended move will land on a floor
+    // statement 3 : allow move if the tile is a npc (result in game over if player walks in)
     private boolean validateMove (String direction, Player character){
         return switch (direction) {
             case "w" -> character.y + 1 < WorldTree.HEIGHT &&
-                    world[character.x][character.y + 1].description().equals("floor");
+                    world[character.x][character.y + 1].description().equals("floor") ||
+                    world[character.x][character.y + 1].description().equals("mountain");
             case "a" -> character.x - 1 >= 0 &&
-                    world[character.x - 1][character.y].description().equals("floor");
+                    world[character.x - 1][character.y].description().equals("floor") ||
+                    world[character.x - 1][character.y].description().equals("mountain");
             case "s" -> character.y - 1 >= 0 &&
-                    world[character.x][character.y - 1].description().equals("floor");
+                    world[character.x][character.y - 1].description().equals("floor") ||
+                    world[character.x][character.y - 1].description().equals("mountain");
             case "d" -> character.x + 1 < WorldTree.WIDTH &&
-                    world[character.x + 1][character.y].description().equals("floor");
+                    world[character.x + 1][character.y].description().equals("floor") ||
+                    world[character.x + 1][character.y].description().equals("mountain");
             default -> false;
         };
     }

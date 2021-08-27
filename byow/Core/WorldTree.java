@@ -28,6 +28,7 @@ public class WorldTree {
     TETile[][] world;
     Random RANDOM;
 
+
     WorldTree(String seed){
         this.seed = validateSeed(seed);
         RANDOM = new Random(this.seed);
