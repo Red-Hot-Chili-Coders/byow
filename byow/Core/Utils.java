@@ -36,20 +36,25 @@ public class Utils {
         int x;
         int y;
 
-        if (direction.equals("w")){
-            x = character.x;
-            y = character.y + 1;
-        }else if (direction.equals("a")){
-            x = character.x - 1;
-            y = character.y;
-        }else if (direction.equals("s")){
-            x = character.x;
-            y = character.y - 1;
-        }else if (direction.equals("d")){
-            x = character.x + 1;
-            y = character.y;
-        }else {
-            return false;
+        switch (direction) {
+            case "w":
+                x = character.x;
+                y = character.y + 1;
+                break;
+            case "a":
+                x = character.x - 1;
+                y = character.y;
+                break;
+            case "s":
+                x = character.x;
+                y = character.y - 1;
+                break;
+            case "d":
+                x = character.x + 1;
+                y = character.y;
+                break;
+            default:
+                return false;
         }
 
         if (0 > x || WorldTree.WIDTH <= x || 0 > y || WorldTree.HEIGHT <= y){
