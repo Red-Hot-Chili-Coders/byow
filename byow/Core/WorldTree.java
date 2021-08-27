@@ -5,6 +5,7 @@ import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -21,7 +22,6 @@ public class WorldTree {
 
     Container root;
     List<Container> leafNodes;
-    Player player;
     static final int WIDTH = 80;
     static final int HEIGHT = 40;
     int seed;
@@ -107,29 +107,51 @@ public class WorldTree {
     }
 
     public Player generatePlayer(){
+        // if selected room has no floors (might happen in some rare case)
+        // then call the functino recursively, until we find better room
+        int[] coordinates = new int[] {-1, -1};
+        while(coordinates[0] == -1){
+            coordinates = getValidCoordinates(getRandomRoom());
+        }
+
+        return new Player(coordinates[0], coordinates[1], Tileset.AVATAR);
+    }
+
+    private int[] getValidCoordinates(Container randomRoom){
         int playerX = -1;
         int playerY = -1;
-
-        Container randomRoom = getRandomRoom();
         for (int i = randomRoom.x; i < randomRoom.w; i++){
             for (int j = randomRoom.y; j < randomRoom.h; j++) {
                 if (world[i][j].description().equals("floor")){
-                    playerX = i;
-                    playerY = j;
-                    break;
+                    return new int[]{i, j};
                 }
             }
         }
+        return new int []{playerX, playerY};
+    }
 
-        // if selected room has no floors (might happen in some rare case)
-        // then call the functino recursively, until we find better room
+    public ArrayList<Player> generateNPC(){
+        ArrayList<Player> npcArray = new ArrayList<>();
+        System.out.println(leafNodes);
+        for (int i = 0; i < 10; i++) {
+            int[] coordinates = getRandomCoordinates();
+            Player npc = new Player(coordinates[0], coordinates[1], Tileset.MOUNTAIN);
+            npcArray.add(npc);
+        }
+        return npcArray;
+    }
 
-        if (playerX == -1){
-            return generatePlayer();
+    private int[] getRandomCoordinates(){
+        int x = RANDOM.nextInt(WIDTH);
+        int y = RANDOM.nextInt(HEIGHT);
+
+        while (world[x][y] != Tileset.FLOOR){
+            x = RANDOM.nextInt(WIDTH);
+            y = RANDOM.nextInt(HEIGHT);
         }
 
-        player = new Player(playerX, playerY, Tileset.AVATAR);
-        return player;
+        return new int[]{x, y};
+
     }
 
     private Container getRandomRoom(){

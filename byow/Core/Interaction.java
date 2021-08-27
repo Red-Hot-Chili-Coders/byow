@@ -6,10 +6,15 @@ import byow.TileEngine.Tileset;
 import edu.princeton.cs.introcs.StdDraw;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Random;
 
 public class Interaction {
+    Random RANDOM;
+    WorldTree t;
     TETile[][] world;
     Player player;
+    ArrayList<Player> npcArray;
     TERenderer te;
     int mouseX;
     int mouseY;
@@ -17,6 +22,7 @@ public class Interaction {
     public Interaction() {
         te = new TERenderer();
         te.initialize(WorldTree.WIDTH, WorldTree.HEIGHT+4);
+        RANDOM = new Random();
     }
 
     void welcomeScreen() {
@@ -101,49 +107,76 @@ public class Interaction {
 
         world = worldTree.generateWorld();
         player = worldTree.generatePlayer();
+        npcArray = worldTree.generateNPC();
 
         updatePlayerPos();
+        updateNPCPos();
         te.renderFrame(world);
 
         while (!gameOver) {
             showMouseInfo();
+
+            moveNPCs();
             String move = listenForCommand();
-            validateAndMakeMove(move);
+            // player movement
+            Thread.sleep(500);
+            validateAndMakeMove(move, player);
+            updatePlayerPos();
             te.renderFrame(world);
         }
     }
 
     // renders player on map
     // player position is updated within validateAndMakeMove
+
+
     private void updatePlayerPos() {
         world[player.x][player.y] = player.tile;
+    }
+
+    private void updateNPCPos(){
+        for (Player npc : npcArray){
+            System.out.println(npc.x + " " + npc.y);
+            if (world[npc.x][npc.y] == player.tile){
+                continue;
+            }
+            world[npc.x][npc.y] = npc.tile;
+        }
+    }
+
+    public void moveNPCs(){
+        String[] moves = new String[]{"w", "a", "s", "d"};
+        for (Player npc : npcArray){
+            String move = moves[RANDOM.nextInt(4)];
+            validateAndMakeMove(move, npc);
+        }
+        updateNPCPos();
     }
 
     // checks if move is valid using validate helper
     // player movement process
     // => reverse existing tile to floor
     // => render player again (based on its new position)
-    private void validateAndMakeMove(String direction) {
-        if (validateMove(direction)) {
+    private void validateAndMakeMove(String direction, Player character) {
+        if (validateMove(direction, character)) {
             switch (direction) {
                 case "w":
-                    reversePlayerTile();
-                    player.y += 1;
+                    reversePlayerTile(character);
+                    character.y += 1;
                     break;
                 case "a":
-                    reversePlayerTile();
-                    player.x -= 1;
+                    reversePlayerTile(character);
+                    character.x -= 1;
                     break;
                 case "s":
-                    reversePlayerTile();
-                    player.y -= 1;
+                    reversePlayerTile(character);
+                    character.y -= 1;
                     break;
                 case "d":
-                    reversePlayerTile();
-                    player.x += 1;
+                    reversePlayerTile(character);
+                    character.x += 1;
                     break;
             }
-            updatePlayerPos();
         }
     }
 
@@ -151,24 +184,24 @@ public class Interaction {
     // at the intended position
     // statement 1 : validates if move goes out of map or not
     // statement 2 : if intended move will land on a floor
-    private boolean validateMove (String direction){
+    private boolean validateMove (String direction, Player character){
         return switch (direction) {
-            case "w" -> player.y + 1 < WorldTree.HEIGHT &&
-                    world[player.x][player.y + 1].description().equals("floor");
-            case "a" -> player.x - 1 >= 0 &&
-                    world[player.x - 1][player.y].description().equals("floor");
-            case "s" -> player.y - 1 >= 0 &&
-                    world[player.x][player.y - 1].description().equals("floor");
-            case "d" -> player.x + 1 < WorldTree.WIDTH &&
-                    world[player.x + 1][player.y].description().equals("floor");
+            case "w" -> character.y + 1 < WorldTree.HEIGHT &&
+                    world[character.x][character.y + 1].description().equals("floor");
+            case "a" -> character.x - 1 >= 0 &&
+                    world[character.x - 1][character.y].description().equals("floor");
+            case "s" -> character.y - 1 >= 0 &&
+                    world[character.x][character.y - 1].description().equals("floor");
+            case "d" -> character.x + 1 < WorldTree.WIDTH &&
+                    world[character.x + 1][character.y].description().equals("floor");
             default -> false;
         };
     }
 
     // reversed player tile to floor tile
     // intermediate function in making move
-    private void reversePlayerTile(){
-        world[player.x][player.y] = Tileset.FLOOR;
+    private void reversePlayerTile(Player character){
+        world[character.x][character.y] = Tileset.FLOOR;
     }
 
     public void showMouseInfo() throws InterruptedException {
