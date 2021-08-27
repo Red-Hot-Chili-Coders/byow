@@ -6,10 +6,11 @@ import byow.TileEngine.Tileset;
 import edu.princeton.cs.introcs.StdDraw;
 
 import java.awt.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Random;
+
+import static byow.Core.Utils.*;
 
 public class Interaction {
     Random RANDOM;
@@ -119,12 +120,12 @@ public class Interaction {
         te.renderFrame(world);
 
         while (!gameOver) {
-            System.out.println("game on");
-            showMouseInfo();
+            showMouseInfo(world);
             moveNPCs();
             String move = listenForCommand();
+
             // player movement
-            validateAndMakeMove(move, player);
+            validateAndMakeMove(move, player, world);
             updatePlayerPos();
             te.renderFrame(world);
         }
@@ -163,98 +164,10 @@ public class Interaction {
         String[] moves = new String[]{"w", "a", "s", "d"};
         for (Player npc : npcArray){
             String move = moves[RANDOM.nextInt(4)];
-            validateAndMakeMove(move, npc);
+            validateAndMakeMove(move, npc, world);
         }
         updateNPCPos();
     }
 
-    // checks if move is valid using validate helper
-    // player movement process
-    // => reverse existing tile to floor
-    // => render player again (based on its new position)
-    private void validateAndMakeMove(String direction, Player character) {
-        if (validateMove(direction, character)) {
-            switch (direction) {
-                case "w":
-                    reversePlayerTile(character);
-                    character.y += 1;
-                    break;
-                case "a":
-                    reversePlayerTile(character);
-                    character.x -= 1;
-                    break;
-                case "s":
-                    reversePlayerTile(character);
-                    character.y -= 1;
-                    break;
-                case "d":
-                    reversePlayerTile(character);
-                    character.x += 1;
-                    break;
-            }
-        }
-    }
-
-    // checks if move is possible , that is a tile exists
-    // at the intended position
-    // statement 1 : validates if move goes out of map or not
-    // statement 2 : if intended move will land on a floor
-    // statement 3 : allow move if the tile is a npc (result in game over if player walks in)
-    private boolean validateMove (String direction, Player character){
-        return switch (direction) {
-            case "w" -> character.y + 1 < WorldTree.HEIGHT &&
-                    world[character.x][character.y + 1].description().equals("floor") ||
-                    world[character.x][character.y + 1].description().equals("mountain");
-            case "a" -> character.x - 1 >= 0 &&
-                    world[character.x - 1][character.y].description().equals("floor") ||
-                    world[character.x - 1][character.y].description().equals("mountain");
-            case "s" -> character.y - 1 >= 0 &&
-                    world[character.x][character.y - 1].description().equals("floor") ||
-                    world[character.x][character.y - 1].description().equals("mountain");
-            case "d" -> character.x + 1 < WorldTree.WIDTH &&
-                    world[character.x + 1][character.y].description().equals("floor") ||
-                    world[character.x + 1][character.y].description().equals("mountain");
-            default -> false;
-        };
-    }
-
-    // reversed player tile to floor tile
-    // intermediate function in making move
-    private void reversePlayerTile(Player character){
-        world[character.x][character.y] = Tileset.FLOOR;
-    }
-
-    public void showMouseInfo() throws InterruptedException {
-        //when the user lets go of the button, send the mouse coordinates to the variables.
-        // the game loops stays frozen for 500 ms , i fried my brains out , but i cant implement async function.
-        // #StdDraw.thisLibraryIsShitAlthoughIstillRespectJava
-
-        if (!StdDraw.isMousePressed()){
-            return;
-        }
-
-        if (mouseX == StdDraw.mouseX() && mouseY == StdDraw.mouseY()){
-            return;
-        }
-
-        mouseX = (int) StdDraw.mouseX();
-        mouseY = (int) StdDraw.mouseY();
-
-        if (mouseX < WorldTree.WIDTH && mouseY < WorldTree.HEIGHT){
-            System.out.println("set" + mouseX + " " + mouseY);
-            StdDraw.text(3, WorldTree.HEIGHT + 3, world[mouseX][mouseY].description());
-            StdDraw.show();
-            Thread.sleep(350);
-            StdDraw.clear();
-        }
-    }
-
-    public String listenForCommand (){
-        StringBuilder s = new StringBuilder();
-            if (StdDraw.hasNextKeyTyped()) {
-                s.append(StdDraw.nextKeyTyped());
-            }
-        return s.toString();
-    }
 }
 

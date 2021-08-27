@@ -1,13 +1,91 @@
 package byow.Core;
 
 import byow.TileEngine.TERenderer;
+import byow.TileEngine.TETile;
+import byow.TileEngine.Tileset;
+import edu.princeton.cs.introcs.StdDraw;
 
 import java.util.Random;
-
-import static byow.Core.WorldTree.HEIGHT;
-import static byow.Core.WorldTree.WIDTH;
-
 public class Utils {
+
+    // checks if move is valid using validate helper
+    // player movement process
+    // => reverse existing tile to floor
+    // => render player again (based on its new position)
+    public static void validateAndMakeMove(String direction, Player character, TETile[][] world) {
+        if (validateMove(direction, character, world)) {
+            reversePlayerTile(character, world);
+            switch (direction) {
+                case "w":
+                    character.y += 1;
+                    break;
+                case "a":
+                    character.x -= 1;
+                    break;
+                case "s":
+                    character.y -= 1;
+                    break;
+                case "d":
+                    character.x += 1;
+                    break;
+            }
+        }
+    }
+
+    public static boolean validateMove (String direction, Player character, TETile[][] world){
+        return switch (direction) {
+            case "w" -> character.y + 1 < WorldTree.HEIGHT &&
+                    world[character.x][character.y + 1].description().equals("floor") ||
+                    world[character.x][character.y + 1].description().equals("mountain");
+            case "a" -> character.x - 1 >= 0 &&
+                    world[character.x - 1][character.y].description().equals("floor") ||
+                    world[character.x - 1][character.y].description().equals("mountain");
+            case "s" -> character.y - 1 >= 0 &&
+                    world[character.x][character.y - 1].description().equals("floor") ||
+                    world[character.x][character.y - 1].description().equals("mountain");
+            case "d" -> character.x + 1 < WorldTree.WIDTH &&
+                    world[character.x + 1][character.y].description().equals("floor") ||
+                    world[character.x + 1][character.y].description().equals("mountain");
+            default -> false;
+        };
+    }
+
+    // reversed player tile to floor tile
+    // intermediate function in making move
+    public static void reversePlayerTile(Player character, TETile[][] world){
+        world[character.x][character.y] = Tileset.FLOOR;
+    }
+
+    public static void showMouseInfo(TETile[][] world) throws InterruptedException {
+        //when the user lets go of the button, send the mouse coordinates to the variables.
+        // the game loops stays frozen for 500 ms , i fried my brains out , but i cant implement async function.
+        // #StdDraw.thisLibraryIsShitAlthoughIstillRespectJava
+
+        if (!StdDraw.isMousePressed()){
+            return;
+        }
+
+        int mouseX = (int) StdDraw.mouseX();
+        int mouseY = (int) StdDraw.mouseY();
+
+        if (mouseX < WorldTree.WIDTH && mouseY < WorldTree.HEIGHT){
+            System.out.println("set" + mouseX + " " + mouseY);
+            StdDraw.text(3, WorldTree.HEIGHT + 3, world[mouseX][mouseY].description());
+            StdDraw.show();
+            Thread.sleep(350);
+            StdDraw.clear();
+        }
+    }
+
+    public static String listenForCommand (){
+        StringBuilder s = new StringBuilder();
+        if (StdDraw.hasNextKeyTyped()) {
+            s.append(StdDraw.nextKeyTyped());
+        }
+        return s.toString();
+    }
+
+
     /**
      * Calculates proper split size for the left subchild
      * if it can't find the size according to the ratios , it returns -1
