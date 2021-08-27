@@ -8,3 +8,5 @@ World generation is done by [binary space partitioning](https://en.wikipedia.org
 
 # Screenshots
 ![](byow.png)
+
+checkout out release for working .jar file!
