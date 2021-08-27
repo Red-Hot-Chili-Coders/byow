@@ -16,18 +16,10 @@ public class Utils {
         if (validateMove(direction, character, world)) {
             reversePlayerTile(character, world);
             switch (direction) {
-                case "w":
-                    character.y += 1;
-                    break;
-                case "a":
-                    character.x -= 1;
-                    break;
-                case "s":
-                    character.y -= 1;
-                    break;
-                case "d":
-                    character.x += 1;
-                    break;
+                case "w" -> character.y += 1;
+                case "a" -> character.x -= 1;
+                case "s" -> character.y -= 1;
+                case "d" -> character.x += 1;
             }
         }
     }
@@ -74,6 +66,12 @@ public class Utils {
         world[character.x][character.y] = Tileset.FLOOR;
     }
 
+    public static void showCollectibleStats(TETile[][] world, int CollectiblesLeft, int Collectibles){
+        StdDraw.text(10, WorldTree.HEIGHT + 3, "Collectibles left to collect : " + CollectiblesLeft + "/" + Collectibles);
+        StdDraw.show();
+        StdDraw.clear();
+    }
+
     public static void showMouseInfo(TETile[][] world) throws InterruptedException {
         //when the user lets go of the button, send the mouse coordinates to the variables.
         // the game loops stays frozen for 500 ms , i fried my brains out , but i cant implement async function.
@@ -87,7 +85,6 @@ public class Utils {
         int mouseY = (int) StdDraw.mouseY();
 
         if (mouseX < WorldTree.WIDTH && mouseY < WorldTree.HEIGHT){
-            System.out.println("set" + mouseX + " " + mouseY);
             StdDraw.text(3, WorldTree.HEIGHT + 3, world[mouseX][mouseY].description());
             StdDraw.show();
             Thread.sleep(350);

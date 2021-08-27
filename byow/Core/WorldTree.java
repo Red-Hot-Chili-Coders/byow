@@ -133,7 +133,6 @@ public class WorldTree {
 
     public ArrayList<Player> generateNPC(){
         ArrayList<Player> npcArray = new ArrayList<>();
-        System.out.println(leafNodes);
         for (int i = 0; i < 10; i++) {
             int[] coordinates = getRandomCoordinates();
             Player npc = new Player(coordinates[0], coordinates[1], Tileset.MOUNTAIN);
@@ -154,8 +153,8 @@ public class WorldTree {
 
     }
 
-    public void generateCollectibles(){
-        for (int i = 0; i < 7; i++){
+    public void generateCollectibles(int n){
+        for (int i = 0; i < n; i++){
             int[] collectibleLocation = getRandomCoordinates();
             int collectibleX = collectibleLocation[0];
             int collectibley = collectibleLocation[1];

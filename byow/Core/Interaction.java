@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import static byow.Core.Utils.*;
+import static java.lang.Thread.sleep;
 
 public class Interaction {
     Random RANDOM;
@@ -19,9 +20,11 @@ public class Interaction {
     Player player;
     ArrayList<Player> npcArray;
     TERenderer te;
-    int collectiblesRemaining = 7;
+    int numberOfCollectibles = 7;
+    int numberOfCollectiblesLeft = numberOfCollectibles;
     long nano;
     boolean gameOver;
+    boolean won;
 
     public Interaction() {
         te = new TERenderer();
@@ -40,18 +43,6 @@ public class Interaction {
 
         StdDraw.show();
 
-    }
-
-    void exit() throws InterruptedException {
-        for (int i = 5; i > 0; i--) {
-            StdDraw.clear(StdDraw.BLACK);
-            StdDraw.setPenColor(Color.WHITE);
-            StdDraw.setPenRadius();
-            StdDraw.text((double) WorldTree.WIDTH / 2, (double) WorldTree.HEIGHT / 4, "Game Exited , restarting in " + i + " seconds");
-            StdDraw.show();
-            Thread.sleep(1000);
-            StdDraw.clear();
-        }
     }
 
     void seedScreen(String seed) {
@@ -74,8 +65,20 @@ public class Interaction {
             seed.append(input);
             seedScreen(seed.toString());
         }
-        Thread.sleep(300);
+        sleep(300);
         return seed.toString();
+    }
+
+    void restartingScreen(String msg) throws InterruptedException {
+        for (int i = 5; i > 0; i--) {
+            StdDraw.clear(StdDraw.BLACK);
+            StdDraw.setPenColor(Color.WHITE);
+            StdDraw.setPenRadius();
+            StdDraw.text((double) WorldTree.WIDTH / 2, (double) WorldTree.HEIGHT / 4, msg + " , restarting in " + i + " seconds");
+            StdDraw.show();
+            sleep(1000);
+            StdDraw.clear();
+        }
     }
 
     void startGame() throws InterruptedException {
@@ -83,18 +86,17 @@ public class Interaction {
         while (inMenu) {
             welcomeScreen();
             String initCommand = listenForCommand();
-            System.out.println(initCommand);
             switch (initCommand) {
                 case "n":
+                    numberOfCollectiblesLeft = numberOfCollectibles;
                     renderWorld();
-                    inMenu = false;
                     break;
                 case "L":
                     //load game
                     break;
                 case "q":
                     // exit
-                    exit();
+                    restartingScreen("Game exited");
                     break;
                 case "r":
                     welcomeScreen();
@@ -117,12 +119,13 @@ public class Interaction {
         npcArray = worldTree.generateNPC();
         updateNPCPos();
 
-        worldTree.generateCollectibles();
+        worldTree.generateCollectibles(numberOfCollectibles);
         te.renderFrame(world);
 
         while (!gameOver) {
-            // check if user has clicked any tile for info
+            // HUD
             showMouseInfo(world);
+            showCollectibleStats(world, numberOfCollectiblesLeft, numberOfCollectibles);
 
             // move npcs
             moveNPCs();
@@ -134,6 +137,13 @@ public class Interaction {
 
             te.renderFrame(world);
         }
+
+        sleep(500);
+        if (won){
+            restartingScreen("you won !");
+        }else{
+            restartingScreen("You were caught !");
+        }
     }
 
     // renders player on map
@@ -144,9 +154,14 @@ public class Interaction {
         if (onTile == Tileset.MOUNTAIN){
             gameOver = true;
             world[player.x][player.y] = Tileset.SAND;
+            won = false;
             return;
         }else if (onTile == Tileset.FLOWER){
-            collectiblesRemaining--;
+            numberOfCollectiblesLeft--;
+            if (numberOfCollectiblesLeft == 0){
+                gameOver = true;
+                won = true;
+            }
         }
 
         world[player.x][player.y] = Tileset.AVATAR;
@@ -154,8 +169,9 @@ public class Interaction {
 
     private void updateNPCPos(){
         for (Player npc : npcArray){
-            System.out.println(npc.x + " " + npc.y);
             if (world[npc.x][npc.y] == player.tile){
+                gameOver = true;
+            }else if (world[npc.x][npc.y] == Tileset.FLOWER) {
                 continue;
             }
             world[npc.x][npc.y] = npc.tile;
