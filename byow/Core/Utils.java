@@ -33,21 +33,34 @@ public class Utils {
     }
 
     public static boolean validateMove (String direction, Player character, TETile[][] world){
-        return switch (direction) {
-            case "w" -> character.y + 1 < WorldTree.HEIGHT &&
-                    world[character.x][character.y + 1].description().equals("floor") ||
-                    world[character.x][character.y + 1].description().equals("mountain");
-            case "a" -> character.x - 1 >= 0 &&
-                    world[character.x - 1][character.y].description().equals("floor") ||
-                    world[character.x - 1][character.y].description().equals("mountain");
-            case "s" -> character.y - 1 >= 0 &&
-                    world[character.x][character.y - 1].description().equals("floor") ||
-                    world[character.x][character.y - 1].description().equals("mountain");
-            case "d" -> character.x + 1 < WorldTree.WIDTH &&
-                    world[character.x + 1][character.y].description().equals("floor") ||
-                    world[character.x + 1][character.y].description().equals("mountain");
-            default -> false;
-        };
+        int x;
+        int y;
+
+        if (direction.equals("w")){
+            x = character.x;
+            y = character.y + 1;
+        }else if (direction.equals("a")){
+            x = character.x - 1;
+            y = character.y;
+        }else if (direction.equals("s")){
+            x = character.x;
+            y = character.y - 1;
+        }else if (direction.equals("d")){
+            x = character.x + 1;
+            y = character.y;
+        }else {
+            return false;
+        }
+
+        if (0 > x || WorldTree.WIDTH <= x || 0 > y || WorldTree.HEIGHT <= y){
+            return false;
+        }
+
+        if (world[x][y] == Tileset.WALL){
+            return false;
+        }
+
+        return true;
     }
 
     // reversed player tile to floor tile

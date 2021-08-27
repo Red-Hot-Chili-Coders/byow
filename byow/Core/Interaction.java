@@ -19,9 +19,7 @@ public class Interaction {
     Player player;
     ArrayList<Player> npcArray;
     TERenderer te;
-    int mouseX;
-    int mouseY;
-
+    int collectiblesRemaining = 7;
     long nano;
     boolean gameOver;
 
@@ -142,12 +140,16 @@ public class Interaction {
     // player position is updated within validateAndMakeMove
     private void updatePlayerPos() {
         // checks if walking into a npc : if yes game over with players grave being shown
-        if (world[player.x][player.y] == Tileset.MOUNTAIN){
+        TETile onTile = world[player.x][player.y];
+        if (onTile == Tileset.MOUNTAIN){
             gameOver = true;
             world[player.x][player.y] = Tileset.SAND;
-        }else {
-            world[player.x][player.y] = Tileset.AVATAR;
+            return;
+        }else if (onTile == Tileset.FLOWER){
+            collectiblesRemaining--;
         }
+
+        world[player.x][player.y] = Tileset.AVATAR;
     }
 
     private void updateNPCPos(){
